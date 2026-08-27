@@ -2,44 +2,43 @@ schema_version: 1
 
 context:
   name: floability
-  version: 0.2.0
-  python_min: "3.10"
+  version: 0.3.0
+  python_min: "3.11"
 
 package:
   name: ${{ name | lower }}
   version: ${{ version }}
 
 source:
-  url: https://github.com/floability/floability-cli/archive/refs/tags/v0.2.0.tar.gz
-  sha256: 0f93305ad445c53db14bfa64a48b0d458b9f7ad4a6e97362c42e86d7e061d8d8
+  url: https://github.com/floability/floability-cli/archive/refs/tags/v0.3.0.tar.gz
+  sha256: 2c025331bbe8a8d2b7d8f713b1e7fac57ca84d5b27c4e51e19842968aca90402
 
 build:
   number: 0
   noarch: python
-  script: ${{ PYTHON }} -m pip install . -vv
-  python:
-    entry_points:
-      - floability=floability.cli:main
+  script: SETUPTOOLS_SCM_PRETEND_VERSION_FOR_FLOABILITY=${{ version }} ${{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv
 
 requirements:
   host:
     - python ${{ python_min }}.*
     - pip
-    - setuptools >=61.0
+    - setuptools >=77
+    - setuptools_scm >=8
     - wheel
-    - conda-pack
   run:
     - python >=${{ python_min }}
+    - boto3
+    - botocore
     - conda-pack
+    - jupyter
+    - jupyter_client
+    - nbformat
+    - ndcctools
+    - pelicanfs
     - pyyaml
     - requests
     - tqdm
-    - ndcctools
-    - nbformat
-    - jupyter_client
-    - boto3
-    - botocore
-    - pelicanfs
+    - xrootd
 
 tests:
   - python:
@@ -51,10 +50,14 @@ tests:
       run:
         - python ${{ python_min }}.*
     script:
+      - floability --version
       - floability --help
+      - python -c "import floability; assert floability.__version__ == '${{ version }}'"
+      - vine_factory --version
+      - vine_worker --version
 
 about:
-  summary: Floability CLI for workflow management
+  summary: Deploy portable TaskVine workflow backpacks on HPC systems
   license: GPL-2.0-only
   license_file: COPYING
   homepage: https://floability.github.io/
@@ -66,3 +69,4 @@ extra:
     - saifulislampi
     - btovar
     - dthain
+
